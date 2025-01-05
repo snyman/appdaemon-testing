@@ -142,6 +142,29 @@ def test_listen_state_with_old(hass_driver):
     )
 
 
+def test_listen_state_with_cb_args(hass_driver):
+    listen_state = hass_driver.get_mock("listen_state")
+    handler = mock.Mock()
+    listen_state(handler, "light.1", param1="one", param2=2)
+
+    hass_driver.set_state("light.1", "on")
+
+    handler.assert_called_once_with(
+            "light.1", "state", "off", "on", {"param1": "one", "param2": 2})
+
+
+def test_listen_state_with_kwargs(hass_driver):
+    hass_driver.use_kwargs = True
+    listen_state = hass_driver.get_mock("listen_state")
+    handler = mock.Mock()
+    listen_state(handler, "light.1", param1="one", param2=2)
+
+    hass_driver.set_state("light.1", "on")
+
+    handler.assert_called_once_with(
+            "light.1", "state", "off", "on", param1="one", param2=2)
+
+
 def test_setup_does_not_trigger_spys(hass_driver):
     listen_state = hass_driver.get_mock("listen_state")
     handler = mock.Mock()

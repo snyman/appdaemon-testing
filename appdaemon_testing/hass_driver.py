@@ -47,6 +47,7 @@ class HassDriver:
             turn_on=mock.Mock(),
         )
 
+        self.use_kwargs = False
         self._setup_active = False
         self._states: Dict[str, Dict[str, Any]] = defaultdict(lambda: {"state": None})
         self._state_spys: Dict[Union[str, None], List[StateSpy]] = defaultdict(
@@ -147,7 +148,10 @@ class HassDriver:
             param_attribute = None if spy.attribute == "all" else attribute_name
 
             if all([sat_old, sat_new, sat_attr]):
-                spy.callback(entity, param_attribute, param_old, param_new, spy.kwargs)
+                if self.use_kwargs:
+                    spy.callback(entity, param_attribute, param_old, param_new, **spy.kwargs)
+                else:
+                    spy.callback(entity, param_attribute, param_old, param_new, spy.kwargs)
 
     def _se_get_state(self, entity_id=None, attribute="state", default=None, **kwargs):
         _LOGGER.debug("Getting state for entity: %s", entity_id)
